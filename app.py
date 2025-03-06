@@ -2,11 +2,11 @@ from dotenv import load_dotenv
 import streamlit as st  
 import os
 from langchain.text_splitter import CharacterTextSplitter
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain.chains.question_answering import load_qa_chain
 from langchain_anthropic import ChatAnthropic
 from langchain.prompts import PromptTemplate
-from langchain.vectorstores import FAISS
+from langchain_community.vectorstores import FAISS
 from pypdf import PdfReader
 
 # Set your API key
@@ -40,12 +40,12 @@ def summarize_pdf(pdf):
         # Define prompt template
         prompt_template = """You are an AI assistant tasked with summarizing documents.
 
-Below is the text extracted from a PDF document:
-
-{context}
-
-Please provide a concise summary of the main points in 5-8 sentences:
-"""
+        Below is the text extracted from a PDF document:
+        
+        {context}
+        
+        Please provide a concise summary of the main points in 5-8 sentences:
+        """
         PROMPT = PromptTemplate(template=prompt_template, input_variables=["context"])
         
         # Initialize LLM and chain
@@ -53,8 +53,8 @@ Please provide a concise summary of the main points in 5-8 sentences:
         chain = load_qa_chain(llm, chain_type="stuff", prompt=PROMPT)
         
         # Get relevant chunks and generate summary
-        docs = vectorstore.similarity_search("Summarize this document", k=4)
-        return chain.run(input_documents=docs, question="Summarize this document")
+        relevant_chunks = vectorstore.similarity_search("Summarize this document", k=4)
+        return chain.run(input_documents=relevant_chunks, question="Summarize this document")
         
     except Exception as e:
         return f"Error: {str(e)}"
